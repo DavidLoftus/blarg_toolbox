@@ -40,7 +40,8 @@ int main(int argc, char** argv) {
 	}
 
 	std::vector<std::thread> threads;
-	int nthreads = 4;
+	int nthreads = std::thread::hardware_concurrency();
+	std::cout << "Using " << nthreads << " threads" << std::endl;
 	for (int i = 1; i <= nthreads; i++) {
 		threads.emplace_back(
 			[=]{
