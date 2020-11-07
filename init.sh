@@ -9,4 +9,4 @@ pushd gifparse/build
     cmake --build .
 popd
 
-./init.sh
+./update.sh
