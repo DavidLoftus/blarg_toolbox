@@ -14,21 +14,23 @@ std::string outputPath(const std::string& path) {
 	int lastSlash = path.find_last_of('/');
 
 	if (lastSlash == std::string::npos) {
-		lastSlash = 0;
+		lastSlash = -1;
 	}
 
 	std::ostringstream oss;
-	oss << "tracks/" << path.substr(lastSlash) << ".dat";
+	oss << "tracks/" << path.substr(lastSlash+1) << ".dat";
 
-	return oss.str();
+	return std::filesystem::absolute(oss.str());
 }
 
 void extract(const std::string& path) {
 	auto track = parse_gif(path);
 	std::string out_path = outputPath(path);
-	std::cout << out_path << std::endl;
-	std::ofstream fs{out_path};
-	fs << track;
+	if (!std::filesystem::exists(out_path)) {
+		std::cout << out_path << std::endl;
+		std::ofstream fs{out_path};
+		fs << track;
+	}
 }
 
 int main(int argc, char** argv) {
