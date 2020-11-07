@@ -24,9 +24,9 @@ std::string outputPath(const std::string& path) {
 }
 
 void extract(const std::string& path) {
-	auto track = parse_gif(path);
 	std::string out_path = outputPath(path);
 	if (!std::filesystem::exists(out_path)) {
+		auto track = parse_gif(path);
 		std::cout << out_path << std::endl;
 		std::ofstream fs{out_path};
 		fs << track;
