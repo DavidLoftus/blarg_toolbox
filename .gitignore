@@ -2,3 +2,5 @@ unique_gifs/
 comments/
 fragments/
 tracks/
+gifparse/build/
+.vscode/
