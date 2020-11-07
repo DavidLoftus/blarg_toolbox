@@ -1,6 +1,5 @@
 #include "gif_parser.hpp"
 
-#include <filesystem>
 #include <sstream>
 #include <fstream>
 
@@ -20,12 +19,17 @@ std::string outputPath(const std::string& path) {
 	std::ostringstream oss;
 	oss << "tracks/" << path.substr(lastSlash+1) << ".dat";
 
-	return std::filesystem::absolute(oss.str());
+	return oss.str();
+}
+
+bool file_exists(const std::string& path) {
+	std::ifstream testFile{path};
+	return testFile.is_open();
 }
 
 void extract(const std::string& path) {
 	std::string out_path = outputPath(path);
-	if (!std::filesystem::exists(out_path)) {
+	if (!file_exists(out_path)) {
 		auto track = parse_gif(path);
 		std::cout << out_path << std::endl;
 		std::ofstream fs{out_path};

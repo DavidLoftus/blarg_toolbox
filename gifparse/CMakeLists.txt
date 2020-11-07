@@ -14,4 +14,3 @@ add_executable(gif_extract gif_extract.cpp gif_parser.hpp gifdec.c)
 add_executable(frame_build frame_build.cpp gif_parser.hpp gifdec.c)
 
 target_link_libraries(gif_extract ${CMAKE_THREAD_LIBS_INIT} )
-target_link_libraries(gif_extract stdc++fs)
