@@ -3,6 +3,7 @@
 #include <iterator>
 #include <fstream>
 #include <unordered_map>
+#include <unordered_set>
 #include <cassert>
 
 char hex_digits[] = "0123456789ABCDEF";
@@ -31,19 +32,27 @@ std::string frameState(const std::vector<PixelTrack>& tracks, int time) {
     return hex_string;
 }
 
-int main(int argc, char** argv) {
-    std::vector<PixelTrack> tracks;
+std::vector<PixelTrack> getPixelTracks(char** paths, int npaths) {
+    std::unordered_set<PixelTrack> uniqueTracks;
 
-    int max_time = 0;
-
-    for (int i = 1; i < argc; ++i) {
-        tracks.emplace_back();
-        std::ifstream ifs{argv[i]};
-        ifs >> tracks.back();
-        max_time = std::max(max_time, tracks.back().length());
+    for (int i = 0; i < npaths; ++i) {
+        PixelTrack track;
+        std::ifstream ifs{paths[i]};
+        ifs >> track;
+        uniqueTracks.insert(std::move(track));
     }
 
+    return std::vector<PixelTrack>{uniqueTracks.begin(), uniqueTracks.end()};
+}
+
+int main(int argc, char** argv) {
+    std::vector<PixelTrack> tracks = getPixelTracks(&argv[1], argc-1);
     std::cout << tracks.size() << " Tracks " << std::endl;
+
+    int max_time = 0;
+    for (auto& track : tracks) {
+        max_time = std::max(max_time, track.length());
+    }
 
     std::unordered_map<std::string, int> frameStates;
     std::vector<std::string> frameStatesSorted;

@@ -59,8 +59,21 @@ private:
 	bool _done;
 };
 
+class PixelTrack;
+
+namespace std {
+	template<>
+	struct hash<PixelTrack> {
+		std::size_t operator()(const PixelTrack& pixel) const;
+	};
+};
+
 class PixelTrack {
 public:
+
+	static constexpr int pallet_black = 0;
+	static constexpr int pallet_white = 1;
+
 	PixelTrack() = default;
 	PixelTrack(std::map<int, int> bits, int length) : _bits(std::move(bits)), _length(length) {}
 
@@ -75,6 +88,10 @@ public:
 			total_delay += delay;
 		}
 
+		if ((--bits.end())->second == pallet_black) {
+			bits[total_delay] = pallet_white;
+		}
+
 		return PixelTrack(std::move(bits), total_delay);
 	}
 
@@ -86,6 +103,14 @@ public:
 
 	int length() const {
 		return _length;
+	}
+
+	const std::map<int, int>& bits() const {
+		return _bits;
+	}
+
+	bool operator==(const PixelTrack& pixel) const {
+		return _bits == pixel._bits;
 	}
 
 	friend std::ostream& operator<<(std::ostream& os, const PixelTrack& pixel) {
@@ -114,8 +139,26 @@ public:
 		}
 		return is;
 	}
+
+	friend std::size_t std::hash<PixelTrack>::operator()(const PixelTrack& pixel) const;
 	
 private:
 	int _length;
 	std::map<int, int> _bits;
 };
+
+template <class T>
+inline void hash_combine(std::size_t& seed, const T& v)
+{
+    std::hash<T> hasher;
+    seed ^= hasher(v) + 0x9e3779b9 + (seed<<6) + (seed>>2);
+}
+
+std::size_t std::hash<PixelTrack>::operator()(const PixelTrack& pixel) const {
+	std::size_t seed = 0;
+	for (auto& p : pixel._bits) {
+		hash_combine(seed, p.first);
+		hash_combine(seed, p.second);
+	}
+	return seed;
+}
