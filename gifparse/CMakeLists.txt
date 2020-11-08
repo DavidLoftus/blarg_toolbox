@@ -14,3 +14,4 @@ add_executable(frame_build frame_build.cpp gif_parser.hpp gifdec.c)
 add_executable(neighbour_search neighbour_search.cpp gif_parser.hpp gifdec.c)
 
 target_link_libraries(gif_extract ${CMAKE_THREAD_LIBS_INIT} )
+target_link_libraries(neighbour_search ${CMAKE_THREAD_LIBS_INIT} )

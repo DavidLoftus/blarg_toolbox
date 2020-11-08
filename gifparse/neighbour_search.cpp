@@ -124,7 +124,7 @@ public:
     }
 
     std::vector<std::pair<int, float>> find_neighbours(size_t index) const {
-        const size_t maxNeighbours = 8;
+        const size_t maxNeighbours = 24;
 
         std::vector<std::pair<int, float>> trackScores;
         for (size_t i = 0; i < _tracks.size(); ++i) {
@@ -150,15 +150,37 @@ public:
         return trackScores;
     }
 
-    void find_all_neighbours() {
-        std::mutex
+    static std::string calculate_output_path(const std::string& path) {
+        int lastSlash = path.find_last_of('/');
+
+        if (lastSlash == std::string::npos) {
+            lastSlash = -1;
+        }
+        return "neighbours/" + path.substr(lastSlash+1);
+    }
+    
+
+    void find_all_neighbours() const {
+        std::mutex ioMut;
         int nthreads = std::thread::hardware_concurrency();
-        for (size_t threadId = 0; threadId < nthreads; ++threadId)
-        for (size_t i = 0; i < _tracks.size(); ++i) {
-            auto neighbours = find_neighbours(i);
-            for (auto& p : neighbours) {
-                std::cout << p.second << ' ' << _trackPaths[i].front() << ' ' << _trackPaths[p.first].front() << '\n'; 
-            }
+        std::vector<std::thread> threads;
+        for (size_t threadId = 0; threadId < nthreads; ++threadId) {
+            threads.emplace_back([this, threadId, nthreads, &ioMut]{
+                for (size_t i = threadId; i < _tracks.size(); i += nthreads) {
+                    auto neighbours = find_neighbours(i);
+                    std::ofstream ofs{calculate_output_path(_trackPaths[i].front())};
+                    for (auto& p : neighbours) {
+                        ofs << p.second << ' ' << _trackPaths[i].front() << ' ' << _trackPaths[p.first].front() << '\n'; 
+                    }
+                    if (i % (nthreads * 10) == 0)
+                    std::lock_guard<std::mutex> lock{ioMut};
+                    std::cout << "i = " << i << std::endl;
+                }
+            });
+        }
+
+        for (auto& thread : threads) {
+            thread.join();
         }
     }
 
